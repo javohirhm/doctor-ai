@@ -432,18 +432,26 @@ def call_medgemma(user_message: str, language: str = "en", timeout: int = 120) -
         return "Sorry, I couldn't generate a response."
 
     # Extract content
+    content = None
     if isinstance(prediction, dict):
         if "choices" in prediction and prediction["choices"]:
             choice = prediction["choices"][0]
             msg = choice.get("message", {})
             if "content" in msg:
-                return msg["content"]
-        if "content" in prediction:
-            return prediction["content"]
-        if "text" in prediction:
-            return prediction["text"]
+                content = msg["content"]
+        if content is None and "content" in prediction:
+            content = prediction["content"]
+        if content is None and "text" in prediction:
+            content = prediction["text"]
 
-    return str(prediction)
+    if content is None:
+        content = str(prediction)
+
+    # Remove everything before <unused95> token (model's thinking process)
+    if "<unused95>" in content:
+        content = content.split("<unused95>", 1)[1].strip()
+
+    return content
 
 # ==================== TELEGRAM HANDLERS ====================
 
@@ -461,10 +469,18 @@ def get_language_keyboard() -> InlineKeyboardMarkup:
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Welcome message with language selection"""
-    await update.message.reply_text(
-        "🌐 Please choose your language / Tilni tanlang / Выберите язык:",
-        reply_markup=get_language_keyboard()
-    )
+    user_id = update.effective_user.id
+    lang = get_user_language(user_id)
+
+    if lang:
+        # User exists, send welcome message in their language
+        await update.message.reply_text(get_message(lang, "welcome"), parse_mode='Markdown')
+    else:
+        # New user, ask for language
+        await update.message.reply_text(
+            "🌐 Please choose your language / Tilni tanlang / Выберите язык:",
+            reply_markup=get_language_keyboard()
+        )
 
 
 async def language_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
