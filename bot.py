@@ -1,5 +1,6 @@
 import os
 import json
+import base64
 import logging
 import requests
 from dotenv import load_dotenv
@@ -453,6 +454,109 @@ def call_medgemma(user_message: str, language: str = "en", timeout: int = 120) -
 
     return content
 
+
+def call_medgemma_with_image(image_base64: str, user_message: str = None, language: str = "en", timeout: int = 120) -> str:
+    """Call MedGemma dedicated endpoint with image and optional text"""
+    # Get credentials
+    credentials, _ = default()
+    if not credentials.valid:
+        credentials.refresh(Request())
+
+    # Use DEDICATED endpoint DNS
+    url = f"https://{DEDICATED_ENDPOINT_DNS}/v1/projects/{PROJECT_ID}/locations/{LOCATION}/endpoints/{ENDPOINT_ID}:predict"
+
+    headers = {
+        "Authorization": f"Bearer {credentials.token}",
+        "Content-Type": "application/json"
+    }
+
+    # Get language-specific system prompt
+    system_prompt = SYSTEM_PROMPTS.get(language, SYSTEM_PROMPTS["en"])
+
+    # Default message if user didn't provide caption
+    if not user_message:
+        default_prompts = {
+            "uz": "Iltimos, ushbu tibbiy tasvirni tahlil qiling.",
+            "ru": "Пожалуйста, проанализируйте это медицинское изображение.",
+            "en": "Please analyze this medical image."
+        }
+        user_message = default_prompts.get(language, default_prompts["en"])
+
+    # Build user content with image and text
+    user_content = [
+        {
+            "type": "image_url",
+            "image_url": {
+                "url": f"data:image/jpeg;base64,{image_base64}"
+            }
+        },
+        {
+            "type": "text",
+            "text": user_message
+        }
+    ]
+
+    payload = {
+        "instances": [{
+            "@requestFormat": "chatCompletions",
+            "messages": [
+                {
+                    "role": "system",
+                    "content": system_prompt
+                },
+                {
+                    "role": "user",
+                    "content": user_content
+                }
+            ]
+        }]
+    }
+
+    logger.info(f"🔄 Calling dedicated endpoint with image (language: {language})...")
+
+    # Make request
+    response = requests.post(url, headers=headers, json=payload, timeout=timeout)
+
+    # Check status
+    if response.status_code != 200:
+        logger.error(f"❌ HTTP {response.status_code}: {response.text}")
+        raise Exception(f"HTTP {response.status_code}: {response.text[:200]}")
+
+    # Parse response
+    result = response.json()
+
+    preds = result.get("predictions")
+
+    # Normalize predictions to a dict
+    if isinstance(preds, dict):
+        prediction = preds
+    elif isinstance(preds, list) and preds:
+        prediction = preds[0]
+    else:
+        return "Sorry, I couldn't generate a response."
+
+    # Extract content
+    content = None
+    if isinstance(prediction, dict):
+        if "choices" in prediction and prediction["choices"]:
+            choice = prediction["choices"][0]
+            msg = choice.get("message", {})
+            if "content" in msg:
+                content = msg["content"]
+        if content is None and "content" in prediction:
+            content = prediction["content"]
+        if content is None and "text" in prediction:
+            content = prediction["text"]
+
+    if content is None:
+        content = str(prediction)
+
+    # Remove everything before <unused95> token (model's thinking process)
+    if "<unused95>" in content:
+        content = content.split("<unused95>", 1)[1].strip()
+
+    return content
+
 # ==================== TELEGRAM HANDLERS ====================
 
 def get_language_keyboard() -> InlineKeyboardMarkup:
@@ -601,6 +705,74 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             pass
 
 
+async def handle_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle medical images from users"""
+
+    user_id = update.effective_user.id
+    user_name = update.effective_user.first_name
+
+    # Check if user has selected a language
+    lang = get_user_language(user_id)
+
+    if not lang:
+        await update.message.reply_text(
+            "Please select a language first / Avval tilni tanlang / Сначала выберите язык",
+            reply_markup=get_language_keyboard()
+        )
+        return
+
+    # Get caption if provided
+    caption = update.message.caption or ""
+
+    logger.info(f"🖼️ Image from {user_name} (ID:{user_id}, lang:{lang}), caption: {caption[:50] if caption else 'None'}...")
+
+    # Show typing indicator and send a temporary "thinking" message
+    await update.message.chat.send_action(action="typing")
+    thinking_msg = await update.message.reply_text(get_message(lang, "thinking"))
+
+    try:
+        # Get the largest photo (best quality)
+        photo = update.message.photo[-1]
+
+        # Download the photo
+        photo_file = await context.bot.get_file(photo.file_id)
+        image_bytes = await photo_file.download_as_bytearray()
+
+        # Convert to base64
+        image_base64 = base64.b64encode(image_bytes).decode('utf-8')
+
+        logger.info(f"🔄 Calling MedGemma endpoint with image...")
+        response_text = call_medgemma_with_image(image_base64, caption, language=lang)
+
+        logger.info(f"✅ Response received ({len(response_text)} chars)")
+
+        # Send response to user
+        safe_text = escape_markdown(response_text, version=2)
+        if len(response_text) > 4000:
+            # Split long messages
+            for i in range(0, len(safe_text), 4000):
+                await update.message.reply_text(
+                    safe_text[i:i+4000],
+                    parse_mode="MarkdownV2"
+                )
+        else:
+            await update.message.reply_text(
+                safe_text,
+                parse_mode="MarkdownV2"
+            )
+
+    except Exception as e:
+        logger.error(f"❌ Error: {str(e)}", exc_info=True)
+        error_msg = get_message(lang, "error", error=str(e)[:200])
+        await update.message.reply_text(error_msg)
+    finally:
+        # Best-effort cleanup of the temporary thinking message
+        try:
+            await thinking_msg.delete()
+        except Exception:
+            pass
+
+
 # ==================== MAIN ====================
 
 def main():
@@ -633,6 +805,11 @@ def main():
     # Add message handler for questions
     application.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message)
+    )
+
+    # Add handler for images
+    application.add_handler(
+        MessageHandler(filters.PHOTO, handle_image)
     )
 
     # Start polling
