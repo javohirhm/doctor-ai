@@ -5,7 +5,7 @@ from app.config import TELEGRAM_TOKEN, PROJECT_ID, LOCATION, ENDPOINT_ID, logger
 from app.database import init_database
 from app.handlers import (
     start, help_command, stats_command, language_command, clear_command,
-    language_callback, suggestion_callback, handle_message, handle_image
+    language_callback, suggestion_callback, handle_message, handle_image, handle_voice
 )
 
 
@@ -50,6 +50,11 @@ def main():
     # Add handler for images
     application.add_handler(
         MessageHandler(filters.PHOTO, handle_image)
+    )
+
+    # Add handler for voice messages
+    application.add_handler(
+        MessageHandler(filters.VOICE, handle_voice)
     )
 
     # Start polling

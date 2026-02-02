@@ -1,3 +1,4 @@
+import base64
 import requests
 import json
 import re
@@ -121,6 +122,78 @@ English text:
     except Exception as e:
         logger.error(f"❌ Translation error: {e}")
         return text
+
+
+# ==================== SPEECH TO TEXT ====================
+
+def transcribe_audio(audio_bytes: bytes, mime_type: str = "audio/ogg", language_hint: str | None = None) -> str:
+    """Transcribe audio to text using Gemini"""
+    if not GEMINI_API_KEY:
+        logger.warning("⚠️ GEMINI_API_KEY not set, skipping transcription")
+        return ""
+
+    try:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
+
+        lang_line = f"Language hint: {language_hint}." if language_hint else ""
+        prompt = (
+            "Transcribe the following medical voice message. "
+            "Return ONLY the transcript text, nothing else. "
+            "Keep medical terminology accurate. "
+            f"{lang_line}"
+        ).strip()
+
+        audio_b64 = base64.b64encode(audio_bytes).decode("utf-8")
+
+        payload = {
+            "contents": [{
+                "parts": [
+                    {"text": prompt},
+                    {"inline_data": {"mime_type": mime_type, "data": audio_b64}}
+                ]
+            }],
+            "generationConfig": {
+                "temperature": 0.2,
+                "maxOutputTokens": 1024,
+                "thinkingConfig": {
+                    "thinkingBudget": 0
+                }
+            }
+        }
+
+        logger.info("🔄 Transcribing audio with Gemini 2.5 Flash...")
+        response = requests.post(url, json=payload, timeout=60)
+
+        if response.status_code != 200:
+            logger.error(f"❌ Transcription API error: {response.status_code} - {response.text[:500]}")
+            return ""
+
+        result = response.json()
+        candidates = result.get("candidates", [])
+        if not candidates:
+            logger.error("❌ No candidates in transcription response")
+            return ""
+
+        parts = candidates[0].get("content", {}).get("parts", [])
+        if not parts:
+            logger.error("❌ No parts in transcription response")
+            return ""
+
+        transcript_parts = []
+        for part in parts:
+            if "thought" in part:
+                continue
+            if "text" in part:
+                transcript_parts.append(part.get("text", ""))
+
+        transcript = "\n".join(transcript_parts).strip()
+        if transcript:
+            logger.info(f"✅ Transcription complete: {transcript[:100]}...")
+        return transcript
+
+    except Exception as e:
+        logger.error(f"❌ Transcription error: {e}", exc_info=True)
+        return ""
 
 
 # ==================== SUGGESTION PROMPTS ====================

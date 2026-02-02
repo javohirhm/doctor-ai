@@ -47,6 +47,7 @@ Namuna: "Yuqori qon bosimining sabablari nima?" """,
 Google Cloud Vertex AI asosida ishlaydi""",
 
         "thinking": "O'ylayapman...",
+        "transcribing": "Ovozli xabarni matnga o'tkazayapman...",
 
         "error": """⚠️ Kechirasiz, xatolik yuz berdi.
 
@@ -58,7 +59,8 @@ Iltimos, qaytadan urinib ko'ring yoki savolingizni boshqacha shakllantiring.""",
         "language_set": "✅ Til o'zbekcha qilib o'rnatildi!",
         "no_language": "Iltimos, avval /start buyrug'i orqali tilni tanlang.",
         "history_cleared": "🗑️ Suhbat tarixi tozalandi.",
-        "analyze_image": "Iltimos, ushbu tibbiy tasvirni tahlil qiling."
+        "analyze_image": "Iltimos, ushbu tibbiy tasvirni tahlil qiling.",
+        "no_transcript": "⚠️ Ovozli xabarni matnga aylantirib bo'lmadi. Iltimos, qayta urinib ko'ring."
     },
 
     "ru": {
@@ -107,6 +109,7 @@ Iltimos, qaytadan urinib ko'ring yoki savolingizni boshqacha shakllantiring.""",
 Работает на Google Cloud Vertex AI""",
 
         "thinking": "Думаю...",
+        "transcribing": "Преобразую голосовое сообщение в текст...",
 
         "error": """⚠️ Извините, произошла ошибка.
 
@@ -118,7 +121,8 @@ Iltimos, qaytadan urinib ko'ring yoki savolingizni boshqacha shakllantiring.""",
         "language_set": "✅ Язык установлен на русский!",
         "no_language": "Пожалуйста, сначала выберите язык через команду /start.",
         "history_cleared": "🗑️ История чата очищена.",
-        "analyze_image": "Пожалуйста, проанализируйте это медицинское изображение."
+        "analyze_image": "Пожалуйста, проанализируйте это медицинское изображение.",
+        "no_transcript": "⚠️ Не удалось преобразовать голос в текст. Пожалуйста, попробуйте снова."
     },
 
     "en": {
@@ -167,6 +171,7 @@ Example: "What causes high blood pressure?" """,
 Powered by Google Cloud Vertex AI""",
 
         "thinking": "Thinking...",
+        "transcribing": "Transcribing your voice message...",
 
         "error": """⚠️ Sorry, an error occurred.
 
@@ -178,7 +183,8 @@ Please try again or rephrase your question.""",
         "language_set": "✅ Language set to English!",
         "no_language": "Please select a language first using the /start command.",
         "history_cleared": "🗑️ Chat history cleared.",
-        "analyze_image": "Please analyze this medical image."
+        "analyze_image": "Please analyze this medical image.",
+        "no_transcript": "⚠️ I couldn't transcribe that voice message. Please try again."
     }
 }
 
