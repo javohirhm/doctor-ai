@@ -13,6 +13,8 @@ env/
 
 # User data
 users.json
+bot_data.db
+*.db
 
 # IDE
 .vscode/
