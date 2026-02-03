@@ -2,9 +2,9 @@
 
 MESSAGES = {
     "uz": {
-        "welcome": """👨‍⚕️ **MedGemma Tibbiy Yordamchi - SinoAI**
+        "welcome": """👨‍⚕️ **Tibbiy Yordamchi - SinoAI**
 
-Assalomu alaykum! Men Google'ning MedGemma 1.5 4B modeli asosida ishlayman.
+Assalomu alaykum!
 
 **Qanday foydalanish:**
 Menga istalgan tibbiy savolingizni yuboring yoki tibbiy rasm yuboring.
@@ -14,18 +14,17 @@ Menga istalgan tibbiy savolingizni yuboring yoki tibbiy rasm yuboring.
 - Yurak xurujining alomatlari nimalar?
 - Gipertoniya nima?
 
-⚠️ **Ogohlantirish:** Bu faqat ta'lim maqsadlari uchun. Har doim malakali shifokorga murojaat qiling.
+⚠️ **Ogohlantirish:** AI xato qilishi mumkin. 
 
 Savolingizni yozing! 🚀""",
 
-        "help": """📖 **MedGemma Botidan Foydalanish**
+        "help": """📖 **SinoAI Botidan Foydalanish**
 
 Menga tibbiy savolingizni yuboring va men ma'lumot beraman!
 
 **Buyruqlar:**
 /start - Tilni tanlash
 /help - Yordam
-/stats - Bot statistikasi
 /language - Tilni o'zgartirish
 /clear - Suhbat tarixini tozalash
 
@@ -36,15 +35,12 @@ Menga tibbiy savolingizni yuboring va men ma'lumot beraman!
 
 Namuna: "Yuqori qon bosimining sabablari nima?" """,
 
-        "stats": """📊 **MedGemma Bot Statistikasi**
+        "stats": """📊 **SinoAI Bot Statistikasi**
 
-🤖 Model: MedGemma 1.5 4B-IT
 📍 Mintaqa: {location}
 ✅ Holat: Faol
 🏥 Maqsad: Tibbiy AI Yordamchi
-🏢 Tashkilot: SinoAI
-
-Google Cloud Vertex AI asosida ishlaydi""",
+🏢 Tashkilot: SinoAI """,
 
         "thinking": "O'ylayapman...",
         "transcribing": "Ovozli xabarni matnga o'tkazayapman...",
@@ -64,9 +60,9 @@ Iltimos, qaytadan urinib ko'ring yoki savolingizni boshqacha shakllantiring.""",
     },
 
     "ru": {
-        "welcome": """👨‍⚕️ **MedGemma Медицинский Ассистент - SinoAI**
+        "welcome": """👨‍⚕️ **Медицинский Ассистент - SinoAI**
 
-Здравствуйте! Я работаю на основе модели Google MedGemma 1.5 4B.
+Здравствуйте!
 
 **Как использовать:**
 Отправьте мне любой медицинский вопрос или медицинское изображение.
@@ -76,18 +72,17 @@ Iltimos, qaytadan urinib ko'ring yoki savolingizni boshqacha shakllantiring.""",
 - Что такое артериальное давление?
 - Признаки сердечного приступа?
 
-⚠️ **Предупреждение:** Только для образовательных целей. Всегда консультируйтесь с врачом.
+⚠️ **Предупреждение:** AI может ошибаться. 
 
 Напишите ваш вопрос! 🚀""",
 
-        "help": """📖 **Как использовать MedGemma Bot**
+        "help": """📖 **Как использовать SinoAI Bot**
 
 Отправьте мне медицинский вопрос и я предоставлю информацию!
 
 **Команды:**
 /start - Выбор языка
 /help - Эта справка
-/stats - Статистика бота
 /language - Изменить язык
 /clear - Очистить историю чата
 
@@ -98,15 +93,12 @@ Iltimos, qaytadan urinib ko'ring yoki savolingizni boshqacha shakllantiring.""",
 
 Пример: "Что вызывает высокое давление?" """,
 
-        "stats": """📊 **Статистика MedGemma Bot**
+        "stats": """📊 **Статистика SinoAI Bot**
 
-🤖 Модель: MedGemma 1.5 4B-IT
 📍 Регион: {location}
 ✅ Статус: Активен
 🏥 Назначение: Медицинский AI Ассистент
-🏢 Организация: SinoAI
-
-Работает на Google Cloud Vertex AI""",
+🏢 Организация: SinoAI """,
 
         "thinking": "Думаю...",
         "transcribing": "Преобразую голосовое сообщение в текст...",
@@ -126,9 +118,9 @@ Iltimos, qaytadan urinib ko'ring yoki savolingizni boshqacha shakllantiring.""",
     },
 
     "en": {
-        "welcome": """👨‍⚕️ **MedGemma Medical Assistant - SinoAI**
+        "welcome": """👨‍⚕️ **Medical Assistant - SinoAI**
 
-Hello! I'm powered by Google's MedGemma 1.5 4B model.
+Hello!
 
 **How to use:**
 Send me any medical question or medical image.
@@ -138,7 +130,7 @@ Send me any medical question or medical image.
 - What is hypertension?
 - Signs of a heart attack?
 
-⚠️ **Disclaimer:** This is for educational purposes only. Always consult a licensed physician.
+⚠️ **Disclaimer:** AI may make mistakes, please keep that in mind.
 
 Type your question to get started! 🚀""",
 
@@ -149,7 +141,6 @@ Just send me your medical question and I'll provide information!
 **Commands:**
 /start - Choose language
 /help - This help message
-/stats - Bot statistics
 /language - Change language
 /clear - Clear chat history
 
@@ -160,15 +151,12 @@ Just send me your medical question and I'll provide information!
 
 Example: "What causes high blood pressure?" """,
 
-        "stats": """📊 **MedGemma Bot Statistics**
+        "stats": """📊 **SinoAI Bot Statistics**
 
-🤖 Model: MedGemma 1.5 4B-IT
 📍 Region: {location}
 ✅ Status: Active
 🏥 Purpose: Medical AI Assistant
-🏢 Organization: SinoAI
-
-Powered by Google Cloud Vertex AI""",
+🏢 Organization: SinoAI """,
 
         "thinking": "Thinking...",
         "transcribing": "Transcribing your voice message...",
