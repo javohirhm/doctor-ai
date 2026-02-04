@@ -10,7 +10,7 @@ from .database import (
     store_suggestion, get_suggestion
 )
 from .messages import get_message
-from .medgemma import call_medgemma, call_medgemma_with_image
+from .llm import call_gemini, call_gemini_with_image
 from .gemini import generate_suggestions, translate_uz_to_en, translate_en_to_uz, transcribe_audio
 
 
@@ -105,7 +105,7 @@ async def language_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def suggestion_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle suggestion button press - sends the suggestion as a new message to MedGemma"""
+    """Handle suggestion button press - sends the suggestion as a new message to Gemini"""
     query = update.callback_query
     await query.answer()
 
@@ -150,16 +150,16 @@ async def suggestion_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
         # Get conversation history
         history = get_conversation_history(user_id)
 
-        # For Uzbek: translate suggestion to English before sending to MedGemma
-        message_for_medgemma = suggestion_text
-        medgemma_lang = lang
+        # For Uzbek: translate suggestion to English before sending to Gemini
+        message_for_llm = suggestion_text
+        llm_lang = lang
         if lang == "uz":
-            message_for_medgemma = translate_uz_to_en(suggestion_text)
-            medgemma_lang = "en"  # Use English prompt for MedGemma
+            message_for_llm = translate_uz_to_en(suggestion_text)
+            llm_lang = "en"  # Use English prompt for Gemini
 
-        # Call MedGemma with the suggestion as the new message
-        logger.info("🔄 Calling MedGemma endpoint with suggestion...")
-        response_text = call_medgemma(message_for_medgemma, language=medgemma_lang, history=history)
+        # Call Gemini with the suggestion as the new message
+        logger.info("🔄 Calling Gemini endpoint with suggestion...")
+        response_text = call_gemini(message_for_llm, language=llm_lang, history=history)
 
         logger.info(f"✅ Response received ({len(response_text)} chars)")
 
@@ -272,16 +272,16 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Get conversation history
         history = get_conversation_history(user_id)
 
-        # For Uzbek: translate to English before sending to MedGemma
-        message_for_medgemma = user_message
-        medgemma_lang = lang
+        # For Uzbek: translate to English before sending to Gemini
+        message_for_llm = user_message
+        llm_lang = lang
         if lang == "uz":
-            message_for_medgemma = translate_uz_to_en(user_message)
-            medgemma_lang = "en"  # Use English prompt for MedGemma
+            message_for_llm = translate_uz_to_en(user_message)
+            llm_lang = "en"  # Use English prompt for Gemini
 
-        # Call MedGemma with user's language and history
-        logger.info("🔄 Calling MedGemma endpoint...")
-        response_text = call_medgemma(message_for_medgemma, language=medgemma_lang, history=history)
+        # Call Gemini with user's language and history
+        logger.info("🔄 Calling Gemini endpoint...")
+        response_text = call_gemini(message_for_llm, language=llm_lang, history=history)
 
         logger.info(f"✅ Response received ({len(response_text)} chars)")
 
@@ -366,14 +366,14 @@ async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         history = get_conversation_history(user_id)
 
-        message_for_medgemma = transcript
-        medgemma_lang = lang
+        message_for_llm = transcript
+        llm_lang = lang
         if lang == "uz":
-            message_for_medgemma = translate_uz_to_en(transcript)
-            medgemma_lang = "en"
+            message_for_llm = translate_uz_to_en(transcript)
+            llm_lang = "en"
 
-        logger.info("🔄 Calling MedGemma endpoint (voice transcript)...")
-        response_text = call_medgemma(message_for_medgemma, language=medgemma_lang, history=history)
+        logger.info("🔄 Calling Gemini endpoint (voice transcript)...")
+        response_text = call_gemini(message_for_llm, language=llm_lang, history=history)
 
         logger.info(f"✅ Response received ({len(response_text)} chars)")
 
@@ -445,18 +445,18 @@ async def handle_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Get conversation history
         history = get_conversation_history(user_id)
 
-        # For Uzbek: translate caption to English before sending to MedGemma
-        caption_for_medgemma = caption
-        medgemma_lang = lang
+        # For Uzbek: translate caption to English before sending to Gemini
+        caption_for_llm = caption
+        llm_lang = lang
         if lang == "uz" and caption:
-            caption_for_medgemma = translate_uz_to_en(caption)
-            medgemma_lang = "en"  # Use English prompt for MedGemma
+            caption_for_llm = translate_uz_to_en(caption)
+            llm_lang = "en"  # Use English prompt for Gemini
         elif lang == "uz":
-            medgemma_lang = "en"
+            llm_lang = "en"
 
-        logger.info("🔄 Calling MedGemma endpoint with image...")
-        response_text = call_medgemma_with_image(
-            image_base64, caption_for_medgemma, language=medgemma_lang, history=history
+        logger.info("🔄 Calling Gemini endpoint with image...")
+        response_text = call_gemini_with_image(
+            image_base64, caption_for_llm, language=llm_lang, history=history
         )
 
         logger.info(f"✅ Response received ({len(response_text)} chars)")
